@@ -1,0 +1,43 @@
+{
+  "name": "scope-ts",
+  "version": "0.1.1",
+  "description": "Hierarchical scoped resource management for TypeScript",
+  "keywords": [
+    "abort-signal",
+    "cleanup",
+    "lifecycle",
+    "resource-management",
+    "scope",
+    "typescript"
+  ],
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "types": "./dist/main.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/main.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "check": "tsc --noEmit",
+    "test": "bun test",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run check && npm test"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
