@@ -1,16 +1,10 @@
 import { expect, test } from "bun:test";
-import { Outcome, Scope } from "./main.js";
+import { Scope } from "./main.js";
 
-test("the package entry point exports the public namespaces", async () => {
+test("the package entry point exports the Scope namespace", async () => {
   const scope = Scope.create("main");
-  const outcome = Outcome.success(scope);
 
-  expect(outcome.success).toBeTrue();
-  if (!outcome.success) {
-    throw new Error("expected successful outcome");
-  }
-
-  expect(outcome.value).toBe(scope);
+  expect(scope.name).toBe("main");
   await scope.close();
   expect(scope.isClosed()).toBeTrue();
 });

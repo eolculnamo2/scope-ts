@@ -64,19 +64,15 @@ test("should close children", async () => {
   const cleanup4 = mock(async () => new Promise((res) => setTimeout(() => res(null), 10)));
 
   const child = scope.child(Scope.create("ch1"));
-  if (!child.success) throw new Error("failed to create child");
-  const child1 = child.value.child(Scope.create("ch2"));
-  if (!child1.success) throw new Error("failed to create child");
-  const child2 = child1.value.child(Scope.create("ch3"));
-  if (!child2.success) throw new Error("failed to create child");
-  const child3 = child2.value.child(Scope.create("ch4"));
-  if (!child3.success) throw new Error("failed to create child");
+  const child1 = child.child(Scope.create("ch2"));
+  const child2 = child1.child(Scope.create("ch3"));
+  const child3 = child2.child(Scope.create("ch4"));
 
   scope.add(cleanup);
-  child.value.add(cleanup1);
-  child1.value.add(cleanup2);
-  child2.value.add(cleanup3);
-  child3.value.add(cleanup4);
+  child.add(cleanup1);
+  child1.add(cleanup2);
+  child2.add(cleanup3);
+  child3.add(cleanup4);
 
   expect(scope.isClosed()).toBeFalse();
   await scope.close();
@@ -293,7 +289,7 @@ test("close functions complete sequentially in LIFO order", async () => {
   expect(calls).toEqual(["last:start", "last:end", "second", "first", "main"]);
 });
 
-test("duplicate child names return a failed outcome without replacing the first child", async () => {
+test("duplicate child names throw without replacing the first child", async () => {
   const calls: string[] = [];
   const scope = Scope.create("main");
   const first = Scope.create("child", {
@@ -303,9 +299,8 @@ test("duplicate child names return a failed outcome without replacing the first 
     onClose: () => calls.push("duplicate"),
   });
 
-  expect(scope.child(first).success).toBeTrue();
-  const result = scope.child(duplicate);
-  expect(result.success).toBeFalse();
+  expect(scope.child(first)).toBe(first);
+  expect(() => scope.child(duplicate)).toThrow("child is already registered to scope");
 
   await scope.close();
   expect(calls).toEqual(["first"]);

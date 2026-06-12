@@ -54,21 +54,15 @@ await scope.close();
 
 ## Child Scopes
 
-Use `scope.child()` to attach an existing scope. It returns an `Outcome`
-indicating whether the child was added. Child names must be unique within their
-parent.
+Use `scope.child()` to attach an existing scope. It returns the attached child,
+which makes creating nested scopes concise. Child names must be unique within
+their parent; adding a duplicate throws an error.
 
 ```ts
 import { Scope } from "scope-ts";
 
 const app = Scope.create("app");
-const database = Scope.create("database");
-
-const result = app.child(database);
-
-if (!result.success) {
-  throw new Error(result.reason);
-}
+const database = app.child(Scope.create("database"));
 
 database.add(async () => {
   await connection.close();
@@ -130,35 +124,18 @@ Cleanup functions and child scopes cannot be added after closing begins.
 
 ### `Scope`
 
-| API                                      | Description                                                        |
-| ---------------------------------------- | ------------------------------------------------------------------ |
-| `Scope.create(name, options?)`           | Create a named scope                                               |
-| `options.onClose`                        | Callback run after children close and before local cleanup         |
-| `options.abortController`                | Controller aborted when closing begins                             |
-| `scope.name`                             | The scope's name                                                   |
-| `scope.add(cleanup)`                     | Register a sync or async cleanup function                          |
-| `scope.child(childScope)`                | Attach a uniquely named child and return an `Outcome`              |
-| `scope.close()`                          | Close children, run the close hook, then run cleanup functions     |
-| `scope.isOpen()`                         | Whether the scope accepts new cleanup functions and children       |
-| `scope.isClosing()`                      | Whether closing is currently in progress                           |
-| `scope.isClosed()`                       | Whether closing has completed                                     |
-
-### `Outcome`
-
-`Outcome.success(value)` and `Outcome.fail(reason)` create discriminated
-results using the `success` property.
-
-```ts
-import { Outcome } from "scope-ts";
-
-const result = Outcome.success("ready");
-
-if (result.success) {
-  console.log(result.value);
-} else {
-  console.error(result.reason);
-}
-```
+| API                            | Description                                                        |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `Scope.create(name, options?)` | Create a named scope                                               |
+| `options.onClose`              | Callback run after children close and before local cleanup         |
+| `options.abortController`      | Controller aborted when closing begins                             |
+| `scope.name`                   | The scope's name                                                   |
+| `scope.add(cleanup)`           | Register a sync or async cleanup function                          |
+| `scope.child(childScope)`      | Attach and return a uniquely named child; throws on duplicate name |
+| `scope.close()`                | Close children, run the close hook, then run cleanup functions     |
+| `scope.isOpen()`               | Whether the scope accepts new cleanup functions and children       |
+| `scope.isClosing()`            | Whether closing is currently in progress                           |
+| `scope.isClosed()`             | Whether closing has completed                                      |
 
 ## Development
 
